@@ -16,6 +16,8 @@ Options:
 
 ## Example
 
+`python3 annotate.py --input_file=example_input.csv --target_file=example_targets.csv --output_dir=output`
+
 ### Input Data
 
 ```
@@ -36,8 +38,18 @@ column,1,1
 column,2,2
 property,0,1
 ```
+### Output
 
-`python3 annotate.py --input_file=example_input.csv --target_file=example_targets.csv --output_dir=output`
+```
+Going to annotate the following file:
+             0                       1           2           3
+0    Y. Khamis                 Al-Wasl       Dubai  1982-07-23
+1    W. Foulke            Chelsea F.C.  Shropshire  1874-04-12
+2    T. Revill         Stoke City F.C.     England    1892-5-9
+3  S. McMillan            Chelsea F.C.   Leicester  1896-09-17
+4     S. James  KK Budućnost Podgorica    Brooklyn  1983-09-10
+
+```
 
 ## References
 * [Paper](http://www.cs.ox.ac.uk/isg/challenges/sem-tab/papers/IDLab.pdf) 

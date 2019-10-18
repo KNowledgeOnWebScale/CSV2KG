@@ -20,7 +20,7 @@ def spotlight_lookup(x, lang='en', conf=0.01):
             resp = requests.get(result, headers={'Connection': 'close'})
             result = resp.url.replace('/page/', '/resource/')
             matches.append(result)
-    except:
+    except Exception as e:
         warnings.warn('[SPOTLIGHT] Something went wrong with request to '
                       '{}. Returning nothing...'.format(url))
         return []
@@ -41,7 +41,7 @@ def try_url(x):
                        'Returning nothing...'
             warnings.warn(warn_msg.format(status, url))
             return []
-    except:
+    except Exception as e:
         warnings.warn('[TRY_URL] Something went wrong with request to '
                       '{}. Returning nothing...'.format(url))
         return []
@@ -76,7 +76,7 @@ def dbpedia_lookup(value, col_type=None, max_hits=50):
             return parsed_result
         else:
             return []
-    except:
+    except Exception as e:
         warnings.warn('[DBPEDIA_LOOKUP] Something went wrong with request to '
                       '{}. Returning nothing...'.format(url))
         return []
