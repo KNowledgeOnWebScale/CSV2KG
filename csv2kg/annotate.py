@@ -4,7 +4,8 @@ import csv
 import pandas as pd
 import click
 
-from cell_annotation import cell_lookup 
+from cell_annotation import cell_lookup
+from column_annotation import annotate_column
 
 
 @click.command()
@@ -16,6 +17,9 @@ def annotate(input_file, target_file, output_dir):
         os.mkdir(output_dir)
 
     targets = pd.read_csv(target_file, header=None)
+    cea_targets = targets[targets[0] == 'cell']
+    cta_targets = targets[targets[0] == 'column']
+    cpa_targets = targets[targets[0] == 'property']
 
     raw_values = pd.read_csv(input_file, header=None)
     print('Going to annotate the following file:')
@@ -25,7 +29,6 @@ def annotate(input_file, target_file, output_dir):
     #       Phase 1: Perform lookups for crude cell annotations       #
     ###################################################################
 
-    cea_targets = targets[targets[0] == 'cell']
     col_targets = set(cea_targets[1])
     cell_targets = set(cea_targets[2])
 
@@ -48,6 +51,36 @@ def annotate(input_file, target_file, output_dir):
     ###################################################################
     #                       Phase 2: Infer columns                    #
     ###################################################################
+
+    col_targets = set(cta_targets[1])
+    column_annotations = []
+    for col in col_targets:
+        entities = lookup_annotations[lookup_annotations[0] == col][2].values
+        types = annotate_column(entities)
+        column_annotations.append([col, types])
+    column_annotations = pd.DataFrame(column_annotations)
+    column_annotations.to_csv('{}/columns_1.csv'.format(output_dir),
+                              header=False, index=False,
+                              quoting=csv.QUOTE_ALL)
+    print('Inferred columns with crude annotations')
+    print(column_annotations.head(5))
+
+    ###################################################################
+    #                     Phase 3: Infer properties                   #
+    ###################################################################
+
+    ###################################################################
+    #                    Phase 4: Annotate head cells                 #
+    ###################################################################
+
+    ###################################################################
+    #                    Phase 5: Annotate other cells                #
+    ###################################################################
+
+    ###################################################################
+    #                       Phase 6: Infer columns                    #
+    ###################################################################
+
 
 if __name__ == '__main__':
     annotate()

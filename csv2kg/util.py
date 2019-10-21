@@ -1,9 +1,15 @@
 import re
 
+import numpy as np
 import langid
 from whoswho import who
 from polyleven import levenshtein
 from ftfy import fix_text
+from scipy.stats import entropy
+
+
+def normalized_entropy(counts):
+    return entropy(counts) / np.log(len(counts))
 
 
 def get_language(string):

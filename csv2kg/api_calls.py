@@ -8,6 +8,90 @@ from SPARQLWrapper import SPARQLWrapper, JSON
 from config import *
 
 
+def get_equivalent_classes(annotation):
+    sparql = SPARQLWrapper(SPARQL_URI)
+    sparql.setQuery("""
+        PREFIX owl: <http://www.w3.org/2002/07/owl#>
+        SELECT ?eq
+        WHERE { <"""+annotation+"""> owl:equivalentClass ?eq }
+    """)
+    sparql.setReturnFormat(JSON)
+    results = sparql.query().convert()
+    results = [x['eq']['value'] 
+               for x in results['results']['bindings'] 
+               if x['eq']['value'].startswith('http://dbpedia.org/ontology/')]
+    if annotation in eq_classes:
+        results.extend(eq_classes[annotation])
+    return list(set(results))
+
+
+def get_parent(x):
+    sparql = SPARQLWrapper(SPARQL_URI)
+    sparql.setQuery("""
+        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+        SELECT ?parent
+        WHERE { <"""+x+"""> rdfs:subClassOf ?parent }
+    """)
+    sparql.setReturnFormat(JSON)
+    results = sparql.query().convert()
+    results = [x['parent']['value'] 
+               for x in results['results']['bindings'] 
+               if x['parent']['value'] in dbpedia_classes]
+    if len(results) > 0:
+        return results[0]
+    else:
+        return None
+
+
+def get_depth_of_type(x):
+    for i in range(8):
+        sparql = SPARQLWrapper(SPARQL_URI)
+        sparql.setQuery("""
+            PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+            PREFIX owl: <http://www.w3.org/2002/07/owl#>
+            ASK WHERE {
+              <"""+x+"""> rdfs:subClassOf{"""+str(i)+"""} owl:Thing . 
+            }
+        """)
+        sparql.setReturnFormat(JSON)
+        results = sparql.query().convert()
+        if results['boolean']:
+            return i
+
+    return 0
+
+
+def is_child(x, y):
+    sparql = SPARQLWrapper(SPARQL_URI)
+    sparql.setQuery("""
+        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+        PREFIX owl: <http://www.w3.org/2002/07/owl#>
+        ASK WHERE {
+          <"""+x+"""> rdfs:subClassOf <"""+y+"""> . 
+        }
+    """)
+    sparql.setReturnFormat(JSON)
+    results = sparql.query().convert()
+    return results['boolean']
+
+
+def get_rdf_types(x):
+    try:
+        sparql = SPARQLWrapper(SPARQL_URI)
+        sparql.setQuery("""
+            SELECT ?type
+            WHERE { <"""+x+"""> a ?type }
+        """)
+        sparql.setReturnFormat(JSON)
+        results = sparql.query().convert()
+
+        types = [x['type']['value'] for x in results['results']['bindings']]
+
+        return [x for x in types if x in dbpedia_classes]
+    except:
+        return []
+
+
 def spotlight_lookup(x, lang='en', conf=0.01):
     url = '{}/{}/annotate'.format(SPOTLIGHT_URI, lang)
     try:

@@ -16,7 +16,7 @@ Options:
 
 ## Example
 
-`python3 annotate.py --input_file=example_input.csv --target_file=example_targets.csv --output_dir=output`
+`python3 annotate.py --input_file=data/example_input.csv --target_file=data/example_targets.csv --output_dir=output`
 
 ### Input Data
 
